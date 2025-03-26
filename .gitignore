@@ -1,0 +1,31 @@
+# IDE 目录
+.idea/
+.vscode/
+.specstory/
+
+# 编译后的二进制文件
+lb-server
+lb-server.exe
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 日志文件
+*.log
+
+# 临时文件
+*.tmp
+*.temp
+tmp/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 配置文件（除了示例配置）
+/configs/*.yaml
+!/configs/config.example.yaml
+
+# 依赖目录
+/vendor/
