@@ -1,0 +1,25 @@
+server:
+  port: 8080
+  read_timeout: 5s
+  write_timeout: 10s
+
+health_check:
+  path: "/health/check"
+  interval: 10s
+  timeout: 2s
+  unhealthy_threshold: 3
+  healthy_threshold: 2
+
+load_balancing:
+  strategy: "round_robin"  # 可选: round_robin, least_conn, ip_hash
+
+backends:
+  - name: "dify-plugin-daemon-1"
+    url: "http://localhost:18080"
+    weight: 1
+  - name: "dify-plugin-daemon-2"
+    url: "http://localhost:18081"
+    weight: 1
+  - name: "dify-plugin-daemon-3"
+    url: "http://localhost:18082"
+    weight: 1 
