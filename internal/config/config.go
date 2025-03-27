@@ -21,6 +21,7 @@ type ServerConfig struct {
 	Port         int           `mapstructure:"port"`
 	ReadTimeout  time.Duration `mapstructure:"read_timeout"`
 	WriteTimeout time.Duration `mapstructure:"write_timeout"`
+	IdleTimeout  time.Duration `mapstructure:"idle_timeout"`
 }
 
 // HealthCheckConfig 包含健康检查相关配置

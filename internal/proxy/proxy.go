@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -106,6 +107,28 @@ func (p *ReverseProxy) handleRequestWithRetry(w http.ResponseWriter, r *http.Req
 
 	// 创建反向代理
 	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+
+	// 设置长连接超时
+	transport := &http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second, // 连接超时
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		ResponseHeaderTimeout: 210 * time.Second, // 响应头超时
+	}
+
+	// 创建自定义客户端
+	client := &http.Client{
+		Transport: transport,
+		Timeout:   220 * time.Second, // 整体请求超时设置为220秒
+	}
+
+	// 设置代理使用自定义客户端
+	proxy.Transport = transport
 
 	// 自定义错误处理
 	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
@@ -265,6 +288,7 @@ func (p *ReverseProxy) Start() error {
 		Handler:      p,
 		ReadTimeout:  p.config.Server.ReadTimeout,
 		WriteTimeout: p.config.Server.WriteTimeout,
+		IdleTimeout:  p.config.Server.IdleTimeout,
 	}
 
 	// 启动健康检查

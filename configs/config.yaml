@@ -1,7 +1,8 @@
 server:
   port: 8080
-  read_timeout: 5s
-  write_timeout: 10s
+  read_timeout: 220s
+  write_timeout: 220s
+  idle_timeout: 240s
 
 health_check:
   path: "/health/check"
@@ -15,11 +16,11 @@ load_balancing:
 
 backends:
   - name: "dify-plugin-daemon-1"
-    url: "http://localhost:18080"
+    url: "http://10.0.254.84:5002"
     weight: 1
   - name: "dify-plugin-daemon-2"
-    url: "http://localhost:18081"
+    url: "http://10.0.254.100:5002"
     weight: 1
   - name: "dify-plugin-daemon-3"
-    url: "http://localhost:18082"
+    url: "http://10.0.254.102:5002"
     weight: 1 
