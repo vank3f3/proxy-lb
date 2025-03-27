@@ -33,9 +33,16 @@ jobs:
             echo "0.1.0" > VERSION
           fi
           
-          # 读取当前版本
-          CURRENT_VERSION=$(cat VERSION)
-          echo "Current version: $CURRENT_VERSION"
+          # 读取当前版本并去除任何不可见字符
+          CURRENT_VERSION=$(cat VERSION | tr -cd '0-9.')
+          echo "Current version (cleaned): $CURRENT_VERSION"
+          
+          # 验证版本格式
+          if ! [[ $CURRENT_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version format: $CURRENT_VERSION"
+            echo "Setting default version 0.1.0"
+            CURRENT_VERSION="0.1.0"
+          fi
           
           # 解析版本号
           IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
@@ -48,11 +55,16 @@ jobs:
           NEW_VERSION="$MAJOR.$MINOR.$PATCH"
           echo "New version: $NEW_VERSION"
           
-          # 更新版本文件
-          echo "$NEW_VERSION" > VERSION
+          # 更新版本文件 (确保没有BOM或其他特殊字符)
+          echo -n "$NEW_VERSION" > VERSION
+          
+          # 显示文件内容的十六进制表示，用于调试
+          echo "VERSION file hex dump:"
+          hexdump -C VERSION
           
           # 设置输出变量
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Version output: $NEW_VERSION"
           
           # 如果不是PR，提交版本更新
           if [ "${{ github.event_name }}" != "pull_request" ]; then
@@ -72,4 +84,4 @@ jobs:
             vank3f3/proxy-lb:latest
             vank3f3/proxy-lb:${{ steps.get_version.outputs.version }}
           cache-from: type=registry,ref=vank3f3/proxy-lb:buildcache
-          cache-to: type=registry,ref=vank3f3/proxy-lb:buildcache,mode=max 
+          cache-to: type=registry,ref=vank3f3/proxy-lb:buildcache,mode=max
