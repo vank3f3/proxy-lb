@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -121,14 +122,13 @@ func (p *ReverseProxy) handleRequestWithRetry(w http.ResponseWriter, r *http.Req
 		ResponseHeaderTimeout: 210 * time.Second, // 响应头超时
 	}
 
-	// 创建自定义客户端
-	client := &http.Client{
-		Transport: transport,
-		Timeout:   220 * time.Second, // 整体请求超时设置为220秒
-	}
-
-	// 设置代理使用自定义客户端
+	// 使用已定义的 transport
 	proxy.Transport = transport
+
+	// 设置请求上下文超时
+	ctx, cancel := context.WithTimeout(r.Context(), 220*time.Second)
+	defer cancel()
+	r = r.WithContext(ctx)
 
 	// 自定义错误处理
 	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
